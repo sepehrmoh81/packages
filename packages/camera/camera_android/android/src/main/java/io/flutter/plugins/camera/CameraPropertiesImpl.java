@@ -4,10 +4,12 @@
 
 package io.flutter.plugins.camera;
 
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.media.MediaRecorder;
 import android.os.Build.VERSION_CODES;
 import android.util.Range;
 import android.util.Rational;
@@ -163,5 +165,19 @@ public class CameraPropertiesImpl implements CameraProperties {
   public int[] getAvailableNoiseReductionModes() {
     return cameraCharacteristics.get(
         CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES);
+  }
+
+  @NonNull
+  @Override
+  public Size[] getVideoSizes() {
+    return cameraCharacteristics.get(
+        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(MediaRecorder.class);
+  }
+
+  @NonNull
+  @Override
+  public Size[] getPreviewSizes() {
+    return cameraCharacteristics.get(
+        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
   }
 }

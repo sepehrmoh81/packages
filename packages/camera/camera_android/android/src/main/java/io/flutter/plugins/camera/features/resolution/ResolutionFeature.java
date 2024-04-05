@@ -269,29 +269,76 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
     }
     boolean captureSizeCalculated = false;
 
-    if (SdkCapabilityChecker.supportsEncoderProfiles()) {
-      recordingProfileLegacy = null;
-      recordingProfile =
-          getBestAvailableCamcorderProfileForResolutionPreset(cameraId, resolutionPreset);
-      List<EncoderProfiles.VideoProfile> videoProfiles = recordingProfile.getVideoProfiles();
+    try {
+      if (SdkCapabilityChecker.supportsEncoderProfiles()) {
+        recordingProfileLegacy = null;
+        recordingProfile =
+            getBestAvailableCamcorderProfileForResolutionPreset(cameraId, resolutionPreset);
+        List<EncoderProfiles.VideoProfile> videoProfiles = recordingProfile.getVideoProfiles();
 
-      EncoderProfiles.VideoProfile defaultVideoProfile = videoProfiles.get(0);
+        EncoderProfiles.VideoProfile defaultVideoProfile = videoProfiles.get(0);
 
-      if (defaultVideoProfile != null) {
-        captureSizeCalculated = true;
-        captureSize = new Size(defaultVideoProfile.getWidth(), defaultVideoProfile.getHeight());
+        if (defaultVideoProfile != null) {
+          captureSizeCalculated = true;
+          captureSize = new Size(defaultVideoProfile.getWidth(), defaultVideoProfile.getHeight());
+        }
+      }
+
+      if (!captureSizeCalculated) {
+        recordingProfile = null;
+        CamcorderProfile camcorderProfile =
+            getBestAvailableCamcorderProfileForResolutionPresetLegacy(cameraId, resolutionPreset);
+        recordingProfileLegacy = camcorderProfile;
+        captureSize =
+            new Size(recordingProfileLegacy.videoFrameWidth, recordingProfileLegacy.videoFrameHeight);
+      }
+
+      previewSize = computeBestPreviewSize(cameraId, resolutionPreset);
+    } catch (IllegalArgumentException e) {
+      captureSize = computeBestSize(cameraProperties.getVideoSizes(), resolutionPreset);
+      previewSize = computeBestSize(cameraProperties.getPreviewSizes(), resolutionPreset);
+    }
+  }
+
+  private static Size computeBestSize(Size[] availableSizes, ResolutionPreset preset) {
+    int maxHeight = Integer.MAX_VALUE;
+
+    switch (preset) {
+      case max:
+        break;
+      case ultraHigh:
+        maxHeight = 2160;
+        break;
+      case veryHigh:
+        maxHeight = 1060;
+        break;
+      case high:
+        maxHeight = 720;
+        break;
+      case medium:
+        maxHeight = 480;
+        break;
+      case low:
+      default:
+        maxHeight = 240;
+        break;
+    }
+
+    int bestArea = 0;
+    int bestIndex = 0;
+    int indexbestIndex = -1;
+
+    for (int idx = 0; idx < availableSizes.length; idx++) { 
+      Size size = availableSizes[idx];
+      if (size.getHeight() <= maxHeight) {
+        int area = size.getWidth() * size.getHeight();
+        if (area > bestArea) {
+          bestIndex = idx;
+          bestArea = area;
+        }
       }
     }
 
-    if (!captureSizeCalculated) {
-      recordingProfile = null;
-      CamcorderProfile camcorderProfile =
-          getBestAvailableCamcorderProfileForResolutionPresetLegacy(cameraId, resolutionPreset);
-      recordingProfileLegacy = camcorderProfile;
-      captureSize =
-          new Size(recordingProfileLegacy.videoFrameWidth, recordingProfileLegacy.videoFrameHeight);
-    }
-
-    previewSize = computeBestPreviewSize(cameraId, resolutionPreset);
+    return availableSizes[bestIndex];
   }
 }

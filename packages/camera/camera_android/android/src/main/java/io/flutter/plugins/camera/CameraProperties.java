@@ -273,4 +273,26 @@ public interface CameraProperties {
    */
   @NonNull
   int[] getAvailableNoiseReductionModes();
+
+  /**
+   * Returns a list of available video stream sizes
+
+   * <p>By default maps to the @see
+   * android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP key.
+   *
+   * @return Size[] List of sizes that are supported by this camera device (map.getOutputSizes(MediaRecorder.class)).
+   */
+  @NonNull
+  Size[] getVideoSizes();
+
+  /**
+   * Returns a list of available preview sizes
+   *
+   * <p>By default maps to the @see
+   * android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP key.
+   *
+   * @return Size[] List of sizes that are supported by this camera device (map.getOutputSizes(ImageFormat.JPEG)).
+   */
+  @NonNull
+  Size[] getPreviewSizes();
 }
