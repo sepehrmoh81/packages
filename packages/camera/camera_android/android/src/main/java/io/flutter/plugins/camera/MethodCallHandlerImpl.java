@@ -367,6 +367,15 @@ final class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
           }
           break;
         }
+      case "usesAlternateResolutionMethod":
+        {
+          try{
+            result.success(camera.cameraFeatures.getResolution().usesAlternateResolutionMethod());
+          } catch (Exception e){
+            handleException(e, result);
+          }
+          break;
+        }
       case "dispose":
         {
           if (camera != null) {

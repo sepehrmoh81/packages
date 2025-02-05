@@ -534,6 +534,15 @@ class AndroidCamera extends CameraPlatform {
     );
   }
 
+  /// Whether the platform uses an alternate method to detect camera resolution.
+  Future<bool> usesAlternateResolutionMethod() async{
+    final bool? alternateResolution = await _channel.invokeMethod<bool>(
+      'usesAlternateResolutionMethod',
+    );
+
+    return alternateResolution!;
+  }
+
   @override
   Widget buildPreview(int cameraId) {
     return Texture(textureId: cameraId);

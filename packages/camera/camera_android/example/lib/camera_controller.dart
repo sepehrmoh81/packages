@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:camera_android/camera_android.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class CameraValue {
   const CameraValue({
     required this.isInitialized,
     this.previewSize,
+    this.usesAlternateResolutionMethod,
     required this.isRecordingVideo,
     required this.isTakingPicture,
     required this.isStreamingImages,
@@ -73,6 +75,11 @@ class CameraValue {
   /// Is `null` until [isInitialized] is `true`.
   final Size? previewSize;
 
+  /// Whether the platform uses an alternate method to detect camera resolution.
+  ///
+  /// Is `null` until [isInitialized] is `true`.
+  final bool? usesAlternateResolutionMethod;
+
   /// The flash mode the camera is currently set to.
   final FlashMode flashMode;
 
@@ -107,6 +114,7 @@ class CameraValue {
     bool? isTakingPicture,
     bool? isStreamingImages,
     Size? previewSize,
+    bool? usesAlternateResolutionMethod,
     bool? isRecordingPaused,
     FlashMode? flashMode,
     ExposureMode? exposureMode,
@@ -123,6 +131,8 @@ class CameraValue {
     return CameraValue(
       isInitialized: isInitialized ?? this.isInitialized,
       previewSize: previewSize ?? this.previewSize,
+      usesAlternateResolutionMethod:
+          usesAlternateResolutionMethod ?? this.usesAlternateResolutionMethod,
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,
       isStreamingImages: isStreamingImages ?? this.isStreamingImages,
@@ -241,6 +251,10 @@ class CameraController extends ValueNotifier<CameraValue> {
                 event.previewWidth,
                 event.previewHeight,
               )),
+      usesAlternateResolutionMethod: await initializeCompleter.future.then(
+          (CameraInitializedEvent value) =>
+              (CameraPlatform.instance as AndroidCamera)
+                  .usesAlternateResolutionMethod()),
       exposureMode: await initializeCompleter.future
           .then((CameraInitializedEvent event) => event.exposureMode),
       focusMode: await initializeCompleter.future

@@ -33,6 +33,7 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
   private EncoderProfiles recordingProfile;
   @NonNull private ResolutionPreset currentSetting;
   private int cameraId;
+  private boolean alternateResolutionMethod = false;
 
   /**
    * Creates a new instance of the {@link ResolutionFeature}.
@@ -90,6 +91,10 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
   @Nullable
   public Size getCaptureSize() {
     return this.captureSize;
+  }
+
+  public boolean usesAlternateResolutionMethod() {
+    return alternateResolutionMethod;
   }
 
   @NonNull
@@ -295,6 +300,7 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
 
       previewSize = computeBestPreviewSize(cameraId, resolutionPreset);
     } catch (IllegalArgumentException e) {
+      alternateResolutionMethod = true;
       captureSize = computeBestSize(cameraProperties.getVideoSizes(), resolutionPreset);
       previewSize = computeBestSize(cameraProperties.getPreviewSizes(), resolutionPreset);
     }
@@ -326,7 +332,6 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
 
     int bestArea = 0;
     int bestIndex = 0;
-    int indexbestIndex = -1;
 
     for (int idx = 0; idx < availableSizes.length; idx++) { 
       Size size = availableSizes[idx];

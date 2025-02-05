@@ -4,8 +4,10 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:camera_android/camera_android.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,7 @@ class CameraValue {
     required this.isInitialized,
     this.errorDescription,
     this.previewSize,
+    this.usesAlternateResolutionMethod,
     required this.isRecordingVideo,
     required this.isTakingPicture,
     required this.isStreamingImages,
@@ -108,6 +111,11 @@ class CameraValue {
   /// Is `null` until [isInitialized] is `true`.
   final Size? previewSize;
 
+  /// Whether the platform uses an alternate method to detect camera resolution.
+  ///
+  /// Is `null` until [isInitialized] is `true`.
+  final bool? usesAlternateResolutionMethod;
+
   /// Convenience getter for `previewSize.width / previewSize.height`.
   ///
   /// Can only be called when [initialize] is done.
@@ -159,6 +167,7 @@ class CameraValue {
     bool? isStreamingImages,
     String? errorDescription,
     Size? previewSize,
+    bool? usesAlternateResolutionMethod,
     bool? isRecordingPaused,
     FlashMode? flashMode,
     ExposureMode? exposureMode,
@@ -176,6 +185,8 @@ class CameraValue {
       isInitialized: isInitialized ?? this.isInitialized,
       errorDescription: errorDescription,
       previewSize: previewSize ?? this.previewSize,
+      usesAlternateResolutionMethod:
+          usesAlternateResolutionMethod ?? this.usesAlternateResolutionMethod,
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,
       isStreamingImages: isStreamingImages ?? this.isStreamingImages,
@@ -375,6 +386,14 @@ class CameraController extends ValueNotifier<CameraValue> {
         focusPointSupported: await initializeCompleter.future
             .then((CameraInitializedEvent event) => event.focusPointSupported),
       );
+
+      if (!kIsWeb && Platform.isAndroid) {
+        value = value.copyWith(
+            usesAlternateResolutionMethod: await initializeCompleter.future
+                .then((CameraInitializedEvent value) =>
+                    (CameraPlatform.instance as AndroidCamera)
+                        .usesAlternateResolutionMethod()));
+      }
     } on PlatformException catch (e) {
       throw CameraException(e.code, e.message);
     } finally {
